@@ -1,0 +1,9 @@
+**/__pycache__
+
+# Adding the following 2 only for dev
+dashboard_api/migrations/*
+!dashboard_api/migrations/.gitkeep
+
+db.sqlite3
+
+.env
