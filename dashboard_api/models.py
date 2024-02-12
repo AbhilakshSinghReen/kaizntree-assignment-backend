@@ -160,7 +160,6 @@ class Item(models.Model):
     class Meta:
         unique_together = ('organization', 'category', 'sub_category', 'name')
 
-    # pass
     def clean(self):
         super().clean()
 

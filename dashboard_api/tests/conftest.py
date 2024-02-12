@@ -10,6 +10,12 @@ from dashboard_api.models import (
 from rest_framework.test import APIClient
 
 
+NUM_USERS_PER_ORG = 2
+NUM_ITEM_CATEGORIES_PER_ORG = 2
+
+
+
+
 def pytest_configure():
     pytest.cache = {
         'auth': {
@@ -43,56 +49,75 @@ def organization_2(db, scope="session"):
 
 # Users
 @pytest.fixture
-def org_1_user_1(db, organization_1, scope="session"):
-    new_user = CustomUser.objects.create_user(
-        email="user1@org1.com",
-        username="user11",
-        password="1234",
-        full_name="User One",
-        phone_number="0000000000",
-        organization=organization_1,
-        role="admin"
-    )
-    return new_user
+def org_1_users(db, organization_1, api_client, scope="session"):
+    login_endpoint = "/api/dashboard/auth/login/"
+
+    users = []
+
+    for i in range(1, 1 + NUM_USERS_PER_ORG):
+        new_user = CustomUser.objects.create_user(
+            email=f"user{i}@org1.com",
+            username=f"user1-{i}",
+            password="1234",
+            full_name=f"User {i}",
+            phone_number="0000000000",
+            organization=organization_1,
+            role="admin"
+        )
+
+        login_response = api_client().post(
+            login_endpoint,
+            {
+                "username": f"user1-{i}",
+	            "password": "1234"
+            },
+            format='json'
+        )
+
+        login_response_data = login_response.json()
+
+        users.append({
+            'object': new_user,
+            'tokens': login_response_data
+        })
+    
+    return users
 
 @pytest.fixture
-def org_1_user_2(db, organization_1, scope="session"):
-    new_user = CustomUser.objects.create_user(
-        email="user2@org1.com",
-        username="user12",
-        password="1234",
-        full_name="User Two",
-        phone_number="0000000000",
-        organization=organization_1,
-        role="admin"
-    )
-    return new_user
+def org_2_users(db, organization_2, api_client, scope="session"):
+    login_endpoint = "/api/dashboard/auth/login/"
 
-@pytest.fixture
-def org_2_user_1(db, organization_2, scope="session"):
-    new_user = CustomUser.objects.create_user(
-        email="user1@org2.com",
-        username="user21",
-        password="1234",
-        full_name="User One",
-        phone_number="0000000000",
-        organization=organization_2,
-        role="admin"
-    )
-    return new_user
+    users = []
 
-@pytest.fixture
-def org_2_user_2(db, organization_2, scope="session"):
-    new_user = CustomUser.objects.create_user(
-        email="user2@org2.com",
-        username="user22",
-        password="1234",
-        full_name="User Two",
-        phone_number="0000000000",
-        organization=organization_2,
-        role="admin"
-    )
-    return new_user
+    for i in range(1, 1 + NUM_USERS_PER_ORG):
+        new_user = CustomUser.objects.create_user(
+            email=f"user{i}@org2.com",
+            username=f"user2-{i}",
+            password="1234",
+            full_name=f"User {i}",
+            phone_number="0000000000",
+            organization=organization_2,
+            role="admin"
+        )
+
+        login_response = api_client().post(
+            login_endpoint,
+            {
+                "username": f"user1-{i}",
+	            "password": "1234"
+            },
+            format='json'
+        )
+
+        login_response_data = login_response.json()
+
+        users.append({
+            'object': new_user,
+            'tokens': login_response_data
+        })
+    
+    return users
+
 
 @pytest.fixture
 def user_1(db, organization_1, scope="session"):
@@ -107,6 +132,31 @@ def user_1(db, organization_1, scope="session"):
     )
     return new_user
 
+@pytest.fixture
+def org_1_item_categories(db, organization_1, scope="session"):
+    item_categories = []
+
+    for i in range(11, 11 + NUM_ITEM_CATEGORIES_PER_ORG):
+        new_item_category = ItemCategory.objects.create(
+            name=f"Item Category {i}",
+            organization=organization_1
+        )
+        item_categories.append(new_item_category)
+        
+    return item_categories
+
+@pytest.fixture
+def org_2_item_categories(db, organization_2, scope="session"):
+    item_categories = []
+
+    for i in range(11, 11 + NUM_ITEM_CATEGORIES_PER_ORG):
+        new_item_category = ItemCategory.objects.create(
+            name=f"Item Category {i}",
+            organization=organization_2
+        )
+        item_categories.append(new_item_category)
+        
+    return item_categories
 
 
 

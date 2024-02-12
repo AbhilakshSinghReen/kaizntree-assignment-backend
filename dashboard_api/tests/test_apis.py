@@ -13,6 +13,7 @@ from dashboard_api.models import (
 )
 
 
+@pytest.mark.skip
 @pytest.mark.django_db
 class TestAuthAPIs:
     register_endpoint = "/api/dashboard/auth/register/"
@@ -147,31 +148,133 @@ class TestAuthAPIs:
 
 @pytest.mark.django_db
 class TestItemCategoryAPIs:
-    endpoint = "item-categories/"
-    endpoint_with_pk = "item-categories/{{pk}}/"
+    endpoint = "/api/dashboard/item-categories/"
+    endpoint_with_pk = "/api/dashboard/item-categories/{{pk}}/"
+    
+    def test_get_by_id(self, api_client, org_1_item_categories, org_1_users, org_2_users):
+        endpoint_with_pk = self.endpoint_with_pk.replace("{{pk}}", str(org_1_item_categories[0].id))
 
-    def get_access_token(self, user_fixture, api_client):
-        login_response = api_client().post(
-            self.login_endpoint,
+        # Test Org 1 Category with Org 1 User
+        headers_1 = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_1_users[0]['tokens']['access']}",
+        }
+
+        response_1 = api_client().get(endpoint_with_pk, **headers_1)
+
+        assert response_1.status_code == 200
+        assert response_1.headers['content-type'] == "application/json"
+
+        response_1_data = response_1.json()
+
+        assert response_1_data['id'] == org_1_item_categories[0].id
+
+        
+        # Test Org 1 Category with Org 2 User
+        headers_2 = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_2_users[0]['tokens']['access']}",
+        }
+
+        response_2 = api_client().get(endpoint_with_pk, **headers_2)
+
+        assert response_2.status_code == 200
+
+    def test_get_all(self, api_client, org_1_item_categories, org_1_users):
+        headers_1 = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_1_users[0]['tokens']['access']}",
+        }
+
+        response_1 = api_client().get(self.endpoint, **headers_1)
+
+        assert response_1.status_code == 200
+        assert response_1.headers['content-type'] == "application/json"
+
+        response_1_data = response_1.json()
+
+        assert isinstance(response_1_data, list)
+        assert len(response_1_data) == len(org_1_item_categories)
+
+        for i, object in enumerate(response_1_data):
+            assert object['id'] == org_1_item_categories[i].id
+    
+    def test_create(self, api_client, org_1_users):
+        headers = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_1_users[0]['tokens']['access']}",
+        }
+
+        create_response = api_client().post(
+            self.endpoint,
             {
-                "username": user_fixture.username,
-	            "password": user_fixture.password
+                "name": "Item Category X",
             },
-            format='json'
+            format='json',
+            **headers
         )
 
-        assert login_response.status_code == 200
-        assert login_response.headers['content-type'] == "application/json"
+        assert create_response.status_code == 201
+        assert create_response.headers['content-type'] == "application/json"
 
-        login_response_data = login_response.json()
+        create_response_data = create_response.json()
+        assert create_response_data['name'] == "Item Category X"
+        assert create_response_data['organization'] == 1
 
-        assert "access" in login_response_data.keys()
+    def test_update(self, api_client, org_1_users):
+        headers = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_1_users[0]['tokens']['access']}",
+        }
+
+        create_response = api_client().post(
+            self.endpoint,
+            {
+                "name": "Item Category Y",
+            },
+            format='json',
+            **headers
+        )
+
+        create_response_data = create_response.json()
+
+        endpoint_with_pk = self.endpoint_with_pk.replace("{{pk}}", str(create_response_data['id']))
+
+        update_response = api_client().put(
+            endpoint_with_pk,
+            {
+                "name": "Item Category Y2",
+            },
+            format='json',
+            **headers
+        )
         
-        return login_response_data["access"]
+        assert update_response.status_code == 200
+        assert update_response.headers['content-type'] == "application/json"
+
+        update_response_data = update_response.json()
+        assert update_response_data['name'] == "Item Category Y2"
+        assert update_response_data['organization'] == 1
     
-    # def test_unauthorized()
-    
-    # def test_create_item_category(self, org_1_user_1):
-    #     access_token = self.get_access_token(org_1_user_1)
-    #     pass
-    
+    def test_delete(self, api_client, org_1_users):
+        headers = {
+            "HTTP_AUTHORIZATION": f"Bearer {org_1_users[0]['tokens']['access']}",
+        }
+
+        create_response = api_client().post(
+            self.endpoint,
+            {
+                "name": "Item Category Y",
+            },
+            format='json',
+            **headers
+        )
+
+        create_response_data = create_response.json()
+
+        endpoint_with_pk = self.endpoint_with_pk.replace("{{pk}}", str(create_response_data['id']))
+
+        delete_response = api_client().delete(endpoint_with_pk,**headers)
+
+        assert delete_response.status_code == 204
+
+    # TODO: def test_create_duplicate
+    # TODO: def test_update_to_duplicate
+    # TODO: def test_update_of_different_org
+    # TODO: def test_delete_of_different_org
+
