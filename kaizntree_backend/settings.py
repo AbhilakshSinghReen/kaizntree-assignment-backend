@@ -85,7 +85,7 @@ DATABASES = {
 
 
 #region Authentication
-# AUTH_USER_MODEL = '???'  # TODO
+AUTH_USER_MODEL = "dashboard_api.CustomUser"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
