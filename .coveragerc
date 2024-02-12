@@ -1,0 +1,39 @@
+# .coveragerc to control coverage.py
+[run]
+source = .
+omit =
+   *env/*
+   *env/bin/*
+   *env/include/*
+   *env/lib/*
+
+   *manage.py
+
+   */settings.py
+   */local_settings.py
+   *asgi.py
+   *wsgi.py
+   
+   *apps.py
+
+   */migrations/*
+
+   */tests/*
+
+   dashboard_api/admin.py
+   dashboard_api/serializers.py
+   dashboard_api/urls.py
+   dashboard_api/views.py
+
+   kaizntree_backend/urls.py
+
+   *__init__*
+   */__pycache__/*
+   */site-packages/*
+   */distutils/*
+
+
+[report]
+#fail_under = 100
+show_missing = True
+#skip_covered = True
