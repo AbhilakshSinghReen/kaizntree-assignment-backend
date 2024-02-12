@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import (
 from dashboard_api.views import (
     TestAPIView,
     RegisterUserAPIView,
+    ItemCategoryGenericAPIView,
 )
 
 urlpatterns = [
@@ -19,4 +20,7 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
     path('auth/logout/', TokenBlacklistView.as_view(), name="token_blacklist"),
 
+    ###
+    path('item-categories/', ItemCategoryGenericAPIView.as_view(), name="item_categories"),
+    path('item-categories/<int:id>/', ItemCategoryGenericAPIView.as_view(), name="item_categories_with_pk"),
 ]

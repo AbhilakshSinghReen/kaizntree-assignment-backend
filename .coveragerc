@@ -23,7 +23,6 @@ omit =
    dashboard_api/admin.py
    dashboard_api/serializers.py
    dashboard_api/urls.py
-   dashboard_api/views.py
 
    kaizntree_backend/urls.py
 
