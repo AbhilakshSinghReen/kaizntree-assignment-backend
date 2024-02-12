@@ -55,13 +55,13 @@ class RegisterUserAPIView(APIView):
 
         validated_data = body_serializer.validated_data
 
-        new_user = CustomUser.objects.create(
+        new_user = CustomUser.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
             password=validated_data['password'],
             full_name=validated_data['full_name'],
             phone_number=validated_data['phone_number'],
-            organization_id=validated_data['organization_id'],
+            organization=validated_data['organization_id'],
             role=validated_data['role']
         )
 
