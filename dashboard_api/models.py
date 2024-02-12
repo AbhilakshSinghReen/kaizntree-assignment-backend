@@ -10,10 +10,34 @@ from djmoney.models.validators import MinMoneyValidator
 
 class CustomUserManager(BaseUserManager):
     def _create_user(self, email, username, password, full_name, phone_number, organization, role, **extra_fields):
+        missing_fields = []
         if not email:
-            raise ValueError("Email must be provided")
+            missing_fields.append('email')
+        if not username:
+            missing_fields.append('username')
         if not password:
-            raise ValueError('Password is not provided')
+            missing_fields.append('password')
+        if not full_name:
+            missing_fields.append('full_name')
+        if not phone_number:
+            missing_fields.append('phone_number')
+        if not organization:
+            missing_fields.append('organization')
+        if not role:
+            missing_fields.append('role')
+        
+        print(email)
+        print(username)
+        print(password)
+        print(full_name)
+        print(phone_number)
+        print(organization)
+        print(role)
+
+
+
+        if len(missing_fields) > 0:
+            raise ValidationError(f"{', '.join(missing_fields)} are not provided.")
         
         if isinstance(organization, int):
             user = self.model(
@@ -143,7 +167,7 @@ class Item(models.Model):
     sub_category = models.ForeignKey(ItemSubcategory, on_delete=models.CASCADE, blank=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=False)
 
-    description = models.TextField()
+    description = models.TextField(default="", blank=True)
     stock_keeping_unit = models.CharField(max_length=255, blank=False)
 
     allocated_to_sales = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
@@ -195,7 +219,7 @@ class Item(models.Model):
         
         if self.usage_tags:
             item_usage_tags = json_loads(self.usage_tags)
-            organization_usage_tags = json_loads(self.organization.usage_tags)
+            organization_usage_tags = json_loads(self.organization.item_usage_tags)
             undefined_usage_tags = []
 
             for tag in item_usage_tags:
