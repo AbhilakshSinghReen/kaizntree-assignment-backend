@@ -12,6 +12,8 @@ from rest_framework.test import APIClient
 
 NUM_USERS_PER_ORG = 2
 NUM_ITEM_CATEGORIES_PER_ORG = 2
+NUM_ITEM_SUBCATEGORIES_PER_ITEM_CATEGORY = 3
+NUM_ITEMS_PER_ITEM_SUBCATEGORY = 4
 
 
 
@@ -118,7 +120,6 @@ def org_2_users(db, organization_2, api_client, scope="session"):
     
     return users
 
-
 @pytest.fixture
 def user_1(db, organization_1, scope="session"):
     new_user = CustomUser.objects.create_user(
@@ -132,6 +133,7 @@ def user_1(db, organization_1, scope="session"):
     )
     return new_user
 
+# Item Categories
 @pytest.fixture
 def org_1_item_categories(db, organization_1, scope="session"):
     item_categories = []
@@ -158,8 +160,36 @@ def org_2_item_categories(db, organization_2, scope="session"):
         
     return item_categories
 
+# Item SubCategories
+@pytest.fixture
+def org_1_item_subcategories(db, organization_1, org_1_item_categories, scope="session"):
+    item_subcategories = []
 
+    for i, item_category_object in enumerate(org_1_item_categories):
+        for j in range(11, 11 + NUM_ITEM_SUBCATEGORIES_PER_ITEM_CATEGORY):
+            new_item_category = ItemSubCategory.objects.create(
+                name=f"Item Sub Category {j}",
+                category=item_category_object,
+                organization=organization_1
+            )
+            item_subcategories.append(new_item_category)
+        
+    return item_subcategories
 
+@pytest.fixture
+def org_2_item_subcategories(db, organization_2, org_2_item_categories, scope="session"):
+    item_subcategories = []
+
+    for i, item_category_object in enumerate(org_2_item_categories):
+        for j in range(11, 11 + NUM_ITEM_SUBCATEGORIES_PER_ITEM_CATEGORY):
+            new_item_category = ItemSubCategory.objects.create(
+                name=f"Item Sub Category {j}",
+                category=item_category_object,
+                organization=organization_2
+            )
+            item_subcategories.append(new_item_category)
+        
+    return item_subcategories
 
 
 
@@ -196,15 +226,4 @@ def item_sub_category_2(db, organization_1, item_category_1, scope="session"):
         category=item_category_1
     )
     return new_user
-
-# @pytest.fixture
-# def item_1(db, organization_1, item_category_1, item_sub_category_1, scope="session"):
-#     new_user = ItemSubCategory.objects.create(
-#         name="Item 1",
-#         stock_keeping_unit="item1",
-#         organization=organization_1,
-#         category=item_category_1,
-#         sub_category=item_sub_category_1,
-#     )
-#     return new_user
 

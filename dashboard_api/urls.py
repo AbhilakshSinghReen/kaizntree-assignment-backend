@@ -9,6 +9,7 @@ from dashboard_api.views import (
     TestAPIView,
     RegisterUserAPIView,
     ItemCategoryGenericAPIView,
+    ItemSubCategoryGenericAPIView,
 )
 
 urlpatterns = [
@@ -23,4 +24,7 @@ urlpatterns = [
     ###
     path('item-categories/', ItemCategoryGenericAPIView.as_view(), name="item_categories"),
     path('item-categories/<int:id>/', ItemCategoryGenericAPIView.as_view(), name="item_categories_with_pk"),
+    path('item-subcategories/', ItemSubCategoryGenericAPIView.as_view(), name="item_subcategories"),
+    path('item-subcategories/<int:id>/', ItemSubCategoryGenericAPIView.as_view(), name="item_subcategories_with_pk"),
+    
 ]
