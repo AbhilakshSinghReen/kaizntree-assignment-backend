@@ -8,22 +8,20 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-#region Load env vars
+# Load env vars
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
 CS__ALLOWED_HOSTS = config('CS__ALLOWED_HOSTS')
 CS__CORS_ORIGIN_WHITELIST = config('CS__CORS_ORIGIN_WHITELIST')
 DJANGO_TIME_ZONE = config('DJANGO_TIME_ZONE')
 DJANGO_LANGUAGE_CODE = config('DJANGO_LANGUAGE_CODE')
-#endregion
 
 
-# region AllowedHosts and CORS
+# AllowedHosts and CORS
 ALLOWED_HOSTS=["*"] if DEBUG else CS__ALLOWED_HOSTS.split(',')
 
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 CORS_ORIGIN_WHITELIST = CS__CORS_ORIGIN_WHITELIST.split(',')
-#endregion
 
 
 ROOT_URLCONF = "kaizntree_backend.urls"
@@ -87,7 +85,7 @@ CACHES = {
 WSGI_APPLICATION = "kaizntree_backend.wsgi.application"
 
 
-#region Database
+# Database
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DATABASES = {
@@ -96,10 +94,9 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-#endregion
 
 
-#region Authentication
+# Authentication
 AUTH_USER_MODEL = "dashboard_api.CustomUser"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -108,27 +105,24 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
-#endregion
 
 
-#region Language and Time Zone
+# Language and Time Zone
 LANGUAGE_CODE = DJANGO_LANGUAGE_CODE
 TIME_ZONE = DJANGO_TIME_ZONE
 USE_I18N = True
 USE_TZ = True
-#endregion
 
 
-#region DRF
+# DRF
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
-#endregion
 
 
-#region DRF Simple JWT
+# DRF Simple JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=15) if DEBUG else timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
@@ -145,13 +139,11 @@ SIMPLE_JWT = {
 
     'JTI_CLAIM': 'jti',
 }
-#endregion
 
 
-#region Static and Media
+# Static and Media
 STATIC_URL = '/static/'
 STATIC_ROOT = join(BASE_DIR, 'static')
 
 MEDIA_URL= "/media/"
 MEDIA_ROOT = join(BASE_DIR, "media")
-#endregion

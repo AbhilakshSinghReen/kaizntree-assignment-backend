@@ -110,6 +110,8 @@ class Item(models.Model):
     incoming_stock = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
     minimum_stock = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
     desired_stock = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
+
+    stock_status = models.CharField(default="out_of_stock", max_length=64,blank=False)
     
     on_build_order = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
     can_build = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
