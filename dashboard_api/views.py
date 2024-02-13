@@ -133,9 +133,9 @@ class ItemCategoryGenericAPIView(
     authentication_classes = [JWTAuthentication]
     serializer_class = ItemCategorySerializer
 
+    model_name = "ItemCategory"
     queryset = ItemCategory.objects.all()
     lookup_field = "id"
-    model_name = "ItemCategory"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -191,12 +191,14 @@ class ItemSubCategoryGenericAPIView(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
-        mixins.DestroyModelMixin
+        mixins.DestroyModelMixin,
+        CacheMixin
     ):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = ItemSubCategorySerializer
 
+    model_name = "ItemSubCategory"
     queryset = ItemSubCategory.objects.all()
     lookup_field = "id"
 
@@ -211,20 +213,48 @@ class ItemSubCategoryGenericAPIView(
         return queryset
     
     def get(self, request, id=None):
+        user_organization = self.request.user.organization
+
+        primary_cache_key = self.generate_primary_cache_key(user_organization.id, request.query_params)
+
         if id:
-            return self.retrieve(request, id)
+            cached_data = self.get_single_cache(primary_cache_key, id)
+            if cached_data:
+                return Response(cached_data)
+            
+            response = self.retrieve(request, id)
+            self.set_single_cache(primary_cache_key, id, response.data)
+            return response
         
-        return self.list(request)
+        cached_data = self.get_all_cache(primary_cache_key)
+        if cached_data:
+            return Response(cached_data)
+        
+        response = self.list(request, id)
+        self.set_all_cache(primary_cache_key, response.data)
+        return response
     
     def post(self, request):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+
+        request.data['organization'] = user_organization.id
         return self.create(request)
     
     def put(self, request, id=None):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.update(request, id)
     
     def delete(self, request, id=None):
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.destroy(request, id)
 
 
@@ -234,12 +264,14 @@ class ItemGenericAPIView(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
-        mixins.DestroyModelMixin
+        mixins.DestroyModelMixin,
+        CacheMixin
     ):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = ItemSerializer
 
+    model_name = "Item"
     queryset = Item.objects.all()
     lookup_field = "id"
 
@@ -297,18 +329,46 @@ class ItemGenericAPIView(
         return queryset
     
     def get(self, request, id=None):
+        user_organization = self.request.user.organization
+
+        primary_cache_key = self.generate_primary_cache_key(user_organization.id, request.query_params)
+
         if id:
-            return self.retrieve(request, id)
+            cached_data = self.get_single_cache(primary_cache_key, id)
+            if cached_data:
+                return Response(cached_data)
+            
+            response = self.retrieve(request, id)
+            self.set_single_cache(primary_cache_key, id, response.data)
+            return response
         
-        return self.list(request)
+        cached_data = self.get_all_cache(primary_cache_key)
+        if cached_data:
+            return Response(cached_data)
+        
+        response = self.list(request, id)
+        self.set_all_cache(primary_cache_key, response.data)
+        return response
     
     def post(self, request):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+
+        request.data['organization'] = user_organization.id
         return self.create(request)
     
     def put(self, request, id=None):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.update(request, id)
     
     def delete(self, request, id=None):
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.destroy(request, id)

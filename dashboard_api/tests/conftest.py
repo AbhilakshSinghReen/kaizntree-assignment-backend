@@ -1,5 +1,5 @@
 from json import dumps as json_dumps
-from random import randint, sample, uniform
+from random import randint, sample, seed, uniform
 
 import pytest
 
@@ -12,13 +12,16 @@ from dashboard_api.models import (
 )
 from rest_framework.test import APIClient
 
-
+RANDOM_SEED = 0
 NUM_USERS_PER_ORG = 2
 NUM_ITEM_CATEGORIES_PER_ORG = 2
 NUM_ITEM_SUBCATEGORIES_PER_ITEM_CATEGORY = 3
 NUM_ITEMS_PER_ITEM_SUBCATEGORY = 4
 DEFAULT_TAGS = ["shopify", "xero"]
 DEFAULT_USAGE_TAGS = ["assembly", "component", "purchasable", "saleable", "bundle"]
+
+
+seed(RANDOM_SEED)
 
 
 def pytest_configure():

@@ -2,6 +2,11 @@ from django.core.cache import cache
 
 
 class CacheMixin:
+    def generate_primary_cache_key(self, organization_id, other_fields):
+        sorted_keys = sorted(other_fields.keys())
+        other_fields_str = "--".join([f"{key}-{other_fields[key]}" for key in sorted_keys])
+        return f"{organization_id}__{other_fields_str}"
+    
     def generate_all_cache_key(self, organization_id):
         return f"{organization_id}__{self.model_name}"
     
