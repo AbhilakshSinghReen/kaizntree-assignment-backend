@@ -7,18 +7,23 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from dashboard_api.mixins import (
+    CacheMixin,
+)
 from dashboard_api.models import (
-    Organization,
     CustomUser,
+    Item,
     ItemCategory,
     ItemSubCategory,
-    Item,
+    Organization,
 )
 from dashboard_api.serializers import (
-    RegisterUserSerializer,
+    ItemSerializer,
     ItemCategorySerializer,
     ItemSubCategorySerializer,
+    RegisterUserSerializer,
 )
+
 
 class TestAPIView(APIView):
     # TODO: don't put this in production
@@ -121,7 +126,8 @@ class ItemCategoryGenericAPIView(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
-        mixins.DestroyModelMixin
+        mixins.DestroyModelMixin,
+        CacheMixin
     ):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -129,26 +135,53 @@ class ItemCategoryGenericAPIView(
 
     queryset = ItemCategory.objects.all()
     lookup_field = "id"
+    model_name = "ItemCategory"
 
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(organization=self.request.user.organization)
     
     def get(self, request, id=None):
+        user_organization = self.request.user.organization
+
         if id:
-            return self.retrieve(request, id)
+            cached_data = self.get_single_cache(user_organization.id, id)
+            if cached_data:
+                return Response(cached_data)
+            
+            response = self.retrieve(request, id)
+            self.set_single_cache(user_organization.id, id, response.data)
+            return response
         
-        return self.list(request)
+        cached_data = self.get_all_cache(user_organization.id)
+        if cached_data:
+            return Response(cached_data)
+        
+        response = self.list(request, id)
+        self.set_all_cache(user_organization.id, response.data)
+        return response
     
     def post(self, request):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+
+        request.data['organization'] = user_organization.id
         return self.create(request)
     
     def put(self, request, id=None):
-        request.data['organization'] = request.user.organization.id
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.update(request, id)
     
     def delete(self, request, id=None):
+        user_organization = self.request.user.organization
+        self.delete_all_cache(user_organization.id)
+        self.delete_single_cache(user_organization.id, id)
+
+        request.data['organization'] = user_organization.id
         return self.destroy(request, id)
     
 
@@ -193,8 +226,89 @@ class ItemSubCategoryGenericAPIView(
     
     def delete(self, request, id=None):
         return self.destroy(request, id)
+
+
+class ItemGenericAPIView(
+        generics.GenericAPIView,
+        mixins.ListModelMixin,
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.DestroyModelMixin
+    ):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = ItemSerializer
+
+    queryset = Item.objects.all()
+    lookup_field = "id"
+
+    direct_filter_fields = [
+        "category",
+        "subcategory",
+        "stock_status",
+    ]
+    contains_filter_fields = [
+        "tags",
+        "usage_tags"
+    ]
+    range_filter_fields = [
+        "allocated_to_sales",
+        "allocated_to_builds",
+        "available_stock",
+        "incoming_stock",
+        "minimum_stock",
+        "desired_stock",
+        "on_build_order",
+        "can_build",
+        "cost",
+    ]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(organization=self.request.user.organization)
+
+        params = self.request.query_params
+
+        for filter_field in self.direct_filter_fields:
+            if filter_field in params:
+                queryset = queryset.filter(**{filter_field: params[filter_field]})
+        
+        for filter_field in self.contains_filter_fields:
+            if filter_field in params:
+                cs_values = params[filter_field].replace(",", "%2c")
+                values = cs_values.split("%2c")
+
+                for value in values:
+                    value = value.strip()
+                    queryset = queryset.filter(**{f"{filter_field}__icontains": value})
+        
+        for filter_field in self.range_filter_fields:
+            if f"{filter_field}__lte" in params:
+                queryset = queryset.filter(**{f"{filter_field}__lte": params[f"{filter_field}__lte"]})
+            elif f"{filter_field}__lt" in params:
+                queryset = queryset.filter(**{f"{filter_field}__lt": params[f"{filter_field}__lt"]})
+
+            if f"{filter_field}__gte" in params:
+                queryset = queryset.filter(**{f"{filter_field}__gte": params[f"{filter_field}__gte"]})
+            elif f"{filter_field}__gt" in params:
+                queryset = queryset.filter(**{f"{filter_field}__gt": params[f"{filter_field}__gt"]})
+        
+        return queryset
     
-
-
-
-
+    def get(self, request, id=None):
+        if id:
+            return self.retrieve(request, id)
+        
+        return self.list(request)
+    
+    def post(self, request):
+        request.data['organization'] = request.user.organization.id
+        return self.create(request)
+    
+    def put(self, request, id=None):
+        request.data['organization'] = request.user.organization.id
+        return self.update(request, id)
+    
+    def delete(self, request, id=None):
+        return self.destroy(request, id)

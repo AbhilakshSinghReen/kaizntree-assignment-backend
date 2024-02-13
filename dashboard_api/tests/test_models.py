@@ -13,7 +13,7 @@ from dashboard_api.models import (
 )
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 class TestOrganization:
     def test_organization_str_return(self, organization_1):
         assert organization_1.__str__() == "Organization 1"
@@ -67,7 +67,7 @@ class TestOrganization:
             assert organization_1.item_tags == original_item_tags
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 class TestCustomUser:
     def test_user_str_return(self, organization_1):
         new_user = CustomUser.objects.create_user(
@@ -193,7 +193,7 @@ class TestCustomUser:
         assert CustomUser.objects.count() == original_num_users + 1
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 @pytest.mark.django_db(transaction=True)
 class TestItemCategory:
     def test_item_category_str_return(self, organization_1):
@@ -244,10 +244,10 @@ class TestItemCategory:
         assert updated_item_category_1.name == original_name
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 class TestItemSubCategory:
     def test_item_sub_category_str_return(self, organization_1, item_category_1):
-        new_item_sub_category = ItemSubcategory.objects.create(
+        new_item_sub_category = ItemSubCategory.objects.create(
             name="Wooden",
             category=item_category_1,
             organization=organization_1
@@ -256,7 +256,7 @@ class TestItemSubCategory:
         assert new_item_sub_category.__str__() == "Wooden"
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 class TestItem:
     def test_item_str_return(self, organization_1, item_category_1, item_sub_category_1):
         new_item = Item.objects.create(

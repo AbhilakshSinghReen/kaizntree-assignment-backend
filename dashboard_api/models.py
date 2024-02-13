@@ -139,7 +139,7 @@ class Item(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=False)
 
     description = models.TextField(default="", blank=True)
-    stock_keeping_unit = models.CharField(max_length=255, blank=False)
+    stock_keeping_unit = models.CharField(unique=True, max_length=255, blank=False)
 
     allocated_to_sales = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
     allocated_to_builds = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
@@ -152,7 +152,8 @@ class Item(models.Model):
     on_build_order = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
     can_build = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
 
-    cost = MoneyField(max_digits=19, decimal_places=4, default_currency='USD', validators=[MinMoneyValidator(0)])
+    cost = models.DecimalField(max_digits=19, decimal_places=4, validators=[MinValueValidator(0)])
+    # cost = MoneyField(max_digits=19, decimal_places=4, default_currency='USD', validators=[MinMoneyValidator(0)])
 
     tags = models.TextField(default=json_dumps([]))
     usage_tags = models.TextField(default=json_dumps([]))

@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from dashboard_api.models import (
     CustomUser,
+    Item,
     ItemCategory,
     ItemSubCategory
 )
@@ -29,7 +30,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class ItemCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemCategory
-        fields = ['id', 'name', 'organization']
+        fields = '__all__'
 
     def validate(self, data):
         if not data.get('name'):
@@ -44,7 +45,7 @@ class ItemCategorySerializer(serializers.ModelSerializer):
 class ItemSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemSubCategory
-        fields = ['id', 'name', 'organization', 'category']
+        fields = '__all__'
 
     def validate(self, data):
         if not data.get('name'):
@@ -57,3 +58,9 @@ class ItemSubCategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('organization is required')
 
         return data
+
+
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'
