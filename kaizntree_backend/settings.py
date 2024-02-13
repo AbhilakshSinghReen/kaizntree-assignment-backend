@@ -91,9 +91,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": join(BASE_DIR, "db.sqlite3"),
     }
 }
+# Use Sqlite for testing locally
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": join(BASE_DIR, "db.sqlite3"),
+#     }
+# }
 
 
 # Authentication
