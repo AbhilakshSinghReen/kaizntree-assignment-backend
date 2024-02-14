@@ -7,15 +7,13 @@
 
 ### Create a virtual environment and activate it
 #### If using venv
->> `python -m venv env`
->>>> On Windows
->>>> `env\Scripts\activate`
->>>>  On Linux/Mac
->>>> `source env/bin/activate`
+> `python -m venv env`
+>> On Windows: `env\Scripts\activate`
+>>  On Linux/Mac: `source env/bin/activate`
 
 #### If using conda
->> `conda create -n env python=3.10`
->> `conda activate env`
+> `conda create -n env python=3.10`
+> `conda activate env`
 
 ### Install the dependencies
 `pip install -r requirements.txt`
