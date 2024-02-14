@@ -6,6 +6,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
+
 
 from dashboard_api.mixins import (
     CacheMixin,
@@ -23,71 +25,6 @@ from dashboard_api.serializers import (
     ItemSubCategorySerializer,
     RegisterUserSerializer,
 )
-
-
-class TestAPIView(APIView):
-    # TODO: don't put this in production
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        roles = ["admin", "foo", "bar"]
-        new_organization_1 = Organization.objects.create(
-            name="Org 1",
-            roles=json_dumps(roles)
-        )
-
-        new_organization_2 = Organization.objects.create(
-            name="Org 2",
-            roles=json_dumps(roles)
-        )
-
-        new_user_1 = CustomUser.objects.create_user(
-            email="user1@org1.com",
-            username="user1",
-            password="1234",
-            full_name="User One",
-            phone_number="0000000000",
-            organization=new_organization_1,
-            role="admin"
-        )
-
-        new_user_2 = CustomUser.objects.create_user(
-            email="user2@org1.com",
-            username="user2",
-            password="1234",
-            full_name="User Two",
-            phone_number="0000000000",
-            organization=new_organization_1,
-            role="admin"
-        )
-
-        new_user_3 = CustomUser.objects.create_user(
-            email="user3@org2.com",
-            username="user3",
-            password="1234",
-            full_name="User Three",
-            phone_number="0000000000",
-            organization=new_organization_2,
-            role="admin"
-        )
-
-
-
-        # new_user = CustomUser.objects.create_user(
-        #     email="abhilaksh@foo.com",
-        #     full_name="ASR",
-        #     phone_number="000",
-        #     organization=new_organization,
-        #     role="not_le_admin"
-        # )
-
-        return Response({
-            "o1": new_organization_1.id,
-            "o2": new_organization_2.id,
-            "u1": new_user_1.id,
-            "u2": new_user_2.id,
-            "u3": new_user_3.id,
-        }, status=status.HTTP_200_OK)
 
 
 class RegisterUserAPIView(APIView):
@@ -265,6 +202,7 @@ class ItemGenericAPIView(
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
         mixins.DestroyModelMixin,
+        PageNumberPagination,
         CacheMixin
     ):
     permission_classes = [IsAuthenticated]
@@ -274,6 +212,8 @@ class ItemGenericAPIView(
     model_name = "Item"
     queryset = Item.objects.all()
     lookup_field = "id"
+
+    page_size = 2
 
     direct_filter_fields = [
         "category",

@@ -10,12 +10,9 @@ from dashboard_api.views import (
     ItemCategoryGenericAPIView,
     ItemSubCategoryGenericAPIView,
     RegisterUserAPIView,
-    TestAPIView,
 )
 
 urlpatterns = [
-    path('test/', TestAPIView.as_view(), name='test'),
-
     # Auth
     path('auth/register/', RegisterUserAPIView.as_view(), name='auth_register'),
     path('auth/login/', TokenObtainPairView.as_view(), name="token_obtain_pair"),

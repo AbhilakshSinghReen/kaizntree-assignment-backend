@@ -7,7 +7,7 @@ from dashboard_api.models import (
 )
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 @pytest.mark.django_db
 class TestAuthAPIs:
     register_endpoint = "/api/dashboard/auth/register/"

@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load env vars
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
+# POSTGRES_PASSWORD = config('POSTGRES_PASSWORD')
 CS__ALLOWED_HOSTS = config('CS__ALLOWED_HOSTS')
 CS__CORS_ORIGIN_WHITELIST = config('CS__CORS_ORIGIN_WHITELIST')
 DJANGO_TIME_ZONE = config('DJANGO_TIME_ZONE')
@@ -88,19 +89,23 @@ WSGI_APPLICATION = "kaizntree_backend.wsgi.application"
 # Database
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "postgres",
+#         "USER": "postgres",
+#         "HOST": "localhost",
+#         "PASSWORD": POSTGRES_PASSWORD,
+#         "PORT": 5432,
+#     }
+# }
+# Use Sqlite for testing locally
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": join(BASE_DIR, "db.sqlite3"),
     }
 }
-# Use Sqlite for testing locally
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": join(BASE_DIR, "db.sqlite3"),
-#     }
-# }
 
 
 # Authentication

@@ -45,6 +45,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
     username = models.CharField(unique=True, max_length=255, blank=False)
     full_name = models.CharField(max_length=255, blank=False)
     phone_number = models.CharField(max_length=20, blank=False)
+    
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=False)
     role = models.CharField(max_length=255, blank=False)
 
@@ -175,9 +176,18 @@ class Item(models.Model):
         return self.name
 
 
-class Build(models.Model):
-    pass
+# class SalesOrder(models.Model):
+#     customer_id = models.CharField(max_length=255, blank=False)
+#     priority = models.IntegerField(default=0, blank=False, validators=[MinValueValidator(0)])
 
 
-class SalesOrder(models.Model):
-    pass
+# class Build(models.Model):
+#     reference_no = models.CharField(max_length=255, blank=False)
+#     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=False)
+#     sales_order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, blank=False)
+#     quantity = models.IntegerField(default=1, blank=False, validators=[MinValueValidator(1)])
+#     total_cost = models.DecimalField(max_digits=19, decimal_places=4, validators=[MinValueValidator(0)])
+
+#     status = models.CharField(max_length=255, blank=False)
+#     creation_date = models.DateTimeField(auto_now_add=True)
+#     completion_date = models.DateTimeField(blank=True, null=True)
